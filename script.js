@@ -1,3 +1,6 @@
+function formatId(name) {
+  return name.replace(/\s+/g, "-").toLowerCase();
+}
 let exercises = [
   "Squat",
   "Leg Press",
@@ -23,12 +26,12 @@ function createTable() {
       let weightInput = document.createElement("input");
       weightInput.placeholder = "lbs";
       weightInput.type = "number";
-      weightInput.id = `${exercise}-set${i}-weight`;
+      weightInput.id = `${formatId(exercise)}-set${i}-weight`;
 
       let repsInput = document.createElement("input");
       repsInput.placeholder = "reps";
       repsInput.type = "number";
-      repsInput.id = `${exercise}-set${i}-reps`;
+      repsInput.id = `${formatId(exercise)}-set${i}-reps`;
 
       // Recalculate volume when typing
       weightInput.oninput = calculateVolume;
@@ -43,7 +46,7 @@ function createTable() {
 
     // Volume cell
     let volumeCell = document.createElement("td");
-    volumeCell.id = `${exercise}-volume`;
+    volumeCell.id = `${formatId(exercise)}-volume`;
     volumeCell.innerText = "0";
     row.appendChild(volumeCell);
 
@@ -62,7 +65,7 @@ function calculateVolume() {
       total += weight * reps;
     }
 
-    let volumeCell = document.getElementById(`${exercise}-volume`);
+   let volumeCell = document.getElementById(`${formatId(exercise)}-volume`);
     volumeCell.innerText = total;
 
     checkPR(exercise, total);
@@ -97,9 +100,8 @@ function function saveData() {
     workout[exercise] = [];
 
     for (let i = 0; i < 4; i++) {
-      let weight = document.getElementById(`${exercise}-set${i}-weight`).value;
-      let reps = document.getElementById(`${exercise}-set${i}-reps`).value;
-
+      let weight = document.getElementById(`${formatId(exercise)}-set${i}-weight`).value;
+let reps = document.getElementById(`${formatId(exercise)}-set${i}-reps`).value;
       workout[exercise].push({ weight, reps });
     }
   });
@@ -130,8 +132,8 @@ function loadByDate() {
 
   exercises.forEach(exercise => {
     workout[exercise]?.forEach((set, i) => {
-      document.getElementById(`${exercise}-set${i}-weight`).value = set.weight;
-      document.getElementById(`${exercise}-set${i}-reps`).value = set.reps;
+      document.getElementById(`${formatId(exercise)}-set${i}-weight`).value = set.weight;
+document.getElementById(`${formatId(exercise)}-set${i}-reps`).value = set.reps;
     });
   });
 
@@ -143,8 +145,8 @@ function loadByDate() {
     data[exercise] = [];
 
     for (let i = 0; i < 4; i++) {
-      let weight = document.getElementById(`${exercise}-set${i}-weight`).value;
-      let reps = document.getElementById(`${exercise}-set${i}-reps`).value;
+      let weight = parseInt(document.getElementById(`${formatId(exercise)}-set${i}-weight`)?.value) || 0;
+let reps = parseInt(document.getElementById(`${formatId(exercise)}-set${i}-reps`)?.value) || 0;
 
       data[exercise].push({ weight, reps });
     }
@@ -187,3 +189,4 @@ function addExercise() {
 }
 
 window.onload = loadData;
+createTable();
