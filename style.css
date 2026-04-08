@@ -8,7 +8,7 @@ body {
 table {
   margin: 20px auto;
   border-collapse: collapse;
-  width: 80%;
+  width: 90%;
 }
 
 th, td {
@@ -17,14 +17,16 @@ th, td {
 }
 
 input {
-  width: 80px;
+  width: 70px;
+  margin: 2px;
   text-align: center;
 }
 
 button {
-  padding: 10px 20px;
-  background: green;
-  color: white;
+  padding: 12px 25px;
+  background: #22c55e;
+  color: black;
   border: none;
   cursor: pointer;
+  font-weight: bold;
 }
