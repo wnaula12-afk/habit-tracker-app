@@ -1,4 +1,4 @@
-const exercises = [
+let exercises = [
   "Squat",
   "Leg Press",
   "Hamstring Curl",
@@ -8,6 +8,8 @@ const exercises = [
 const table = document.getElementById("workoutTable");
 
 function createTable() {
+  table.innerHTML = "";
+
   exercises.forEach((exercise) => {
     let row = document.createElement("tr");
 
@@ -28,6 +30,10 @@ function createTable() {
       repsInput.type = "number";
       repsInput.id = `${exercise}-set${i}-reps`;
 
+      // Recalculate volume when typing
+      weightInput.oninput = calculateVolume;
+      repsInput.oninput = calculateVolume;
+
       cell.appendChild(weightInput);
       cell.appendChild(document.createElement("br"));
       cell.appendChild(repsInput);
@@ -35,8 +41,44 @@ function createTable() {
       row.appendChild(cell);
     }
 
+    // Volume cell
+    let volumeCell = document.createElement("td");
+    volumeCell.id = `${exercise}-volume`;
+    volumeCell.innerText = "0";
+    row.appendChild(volumeCell);
+
     table.appendChild(row);
   });
+}
+
+function calculateVolume() {
+  exercises.forEach(exercise => {
+    let total = 0;
+
+    for (let i = 0; i < 4; i++) {
+      let weight = parseInt(document.getElementById(`${exercise}-set${i}-weight`)?.value) || 0;
+      let reps = parseInt(document.getElementById(`${exercise}-set${i}-reps`)?.value) || 0;
+
+      total += weight * reps;
+    }
+
+    let volumeCell = document.getElementById(`${exercise}-volume`);
+    volumeCell.innerText = total;
+
+    checkPR(exercise, total);
+  });
+}
+
+function checkPR(exercise, volume) {
+  let prs = JSON.parse(localStorage.getItem("prs")) || {};
+
+  if (!prs[exercise] || volume > prs[exercise]) {
+    prs[exercise] = volume;
+    localStorage.setItem("prs", JSON.stringify(prs));
+
+    let cell = document.getElementById(`${exercise}-volume`);
+    cell.style.color = "lime";
+  }
 }
 
 function saveData() {
@@ -54,10 +96,17 @@ function saveData() {
   });
 
   localStorage.setItem("workoutData", JSON.stringify(data));
+  localStorage.setItem("exerciseList", JSON.stringify(exercises));
+
   alert("Workout Saved!");
 }
 
 function loadData() {
+  let savedExercises = JSON.parse(localStorage.getItem("exerciseList"));
+  if (savedExercises) exercises = savedExercises;
+
+  createTable();
+
   let saved = localStorage.getItem("workoutData");
   if (!saved) return;
 
@@ -69,7 +118,18 @@ function loadData() {
       document.getElementById(`${exercise}-set${i}-reps`).value = set.reps;
     });
   });
+
+  calculateVolume();
 }
 
-createTable();
+function addExercise() {
+  let name = prompt("Enter exercise name:");
+  if (!name) return;
+
+  exercises.push(name);
+  localStorage.setItem("exerciseList", JSON.stringify(exercises));
+
+  createTable();
+}
+
 window.onload = loadData;
