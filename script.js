@@ -81,7 +81,63 @@ function checkPR(exercise, volume) {
   }
 }
 
-function saveData() {
+function function saveData() {
+  let date = document.getElementById("workoutDate").value;
+
+  if (!date) {
+    alert("Please select a date first!");
+    return;
+  }
+
+  let allData = JSON.parse(localStorage.getItem("allWorkouts")) || {};
+
+  let workout = {};
+
+  exercises.forEach(exercise => {
+    workout[exercise] = [];
+
+    for (let i = 0; i < 4; i++) {
+      let weight = document.getElementById(`${exercise}-set${i}-weight`).value;
+      let reps = document.getElementById(`${exercise}-set${i}-reps`).value;
+
+      workout[exercise].push({ weight, reps });
+    }
+  });
+
+  allData[date] = workout;
+
+  localStorage.setItem("allWorkouts", JSON.stringify(allData));
+  localStorage.setItem("exerciseList", JSON.stringify(exercises));
+
+  alert("Workout Saved for " + date);
+} 
+function loadByDate() {
+  let date = document.getElementById("workoutDate").value;
+
+  if (!date) {
+    alert("Select a date!");
+    return;
+  }
+
+  let allData = JSON.parse(localStorage.getItem("allWorkouts")) || {};
+  let workout = allData[date];
+
+  createTable();
+
+  if (!workout) {
+    alert("No workout found for this date.");
+    return;
+  }
+
+  exercises.forEach(exercise => {
+    workout[exercise]?.forEach((set, i) => {
+      document.getElementById(`${exercise}-set${i}-weight`).value = set.weight;
+      document.getElementById(`${exercise}-set${i}-reps`).value = set.reps;
+    });
+  });
+
+  calculateVolume();
+}
   let data = {};
 
   exercises.forEach(exercise => {
@@ -107,7 +163,6 @@ function loadData() {
 
   createTable();
 
-  let saved = localStorage.getItem("workoutData");
   if (!saved) return;
 
   let data = JSON.parse(saved);
