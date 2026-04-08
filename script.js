@@ -1,39 +1,41 @@
+// ===== FORMAT ID (fix spaces issue) =====
 function formatId(name) {
   return name.replace(/\s+/g, "-").toLowerCase();
 }
-let exercises = [
-  "Squat",
-  "Leg Press",
-  "Hamstring Curl",
-  "Calf Raises"
-];
 
+// ===== DEFAULT EXERCISES =====
+let exercises = ["Squat", "Leg Press", "Hamstring Curl", "Calf Raises"];
+
+// ===== GET TABLE =====
 const table = document.getElementById("workoutTable");
 
+// ===== CREATE TABLE =====
 function createTable() {
   table.innerHTML = "";
 
   exercises.forEach((exercise) => {
     let row = document.createElement("tr");
 
+    // Exercise name
     let nameCell = document.createElement("td");
     nameCell.innerText = exercise;
     row.appendChild(nameCell);
 
+    // Sets
     for (let i = 0; i < 4; i++) {
       let cell = document.createElement("td");
 
       let weightInput = document.createElement("input");
-      weightInput.placeholder = "lbs";
       weightInput.type = "number";
+      weightInput.placeholder = "lbs";
       weightInput.id = `${formatId(exercise)}-set${i}-weight`;
 
       let repsInput = document.createElement("input");
-      repsInput.placeholder = "reps";
       repsInput.type = "number";
+      repsInput.placeholder = "reps";
       repsInput.id = `${formatId(exercise)}-set${i}-reps`;
 
-      // Recalculate volume when typing
+      // Update volume live
       weightInput.oninput = calculateVolume;
       repsInput.oninput = calculateVolume;
 
@@ -44,47 +46,62 @@ function createTable() {
       row.appendChild(cell);
     }
 
-    // Volume cell
+    // Volume column
     let volumeCell = document.createElement("td");
     volumeCell.id = `${formatId(exercise)}-volume`;
     volumeCell.innerText = "0";
+
     row.appendChild(volumeCell);
 
     table.appendChild(row);
   });
 }
 
+// ===== CALCULATE VOLUME =====
 function calculateVolume() {
-  exercises.forEach(exercise => {
+  exercises.forEach((exercise) => {
     let total = 0;
 
     for (let i = 0; i < 4; i++) {
-      let weight = parseInt(document.getElementById(`${exercise}-set${i}-weight`)?.value) || 0;
-      let reps = parseInt(document.getElementById(`${exercise}-set${i}-reps`)?.value) || 0;
+      let weight =
+        parseInt(
+          document.getElementById(`${formatId(exercise)}-set${i}-weight`)?.value
+        ) || 0;
+
+      let reps =
+        parseInt(
+          document.getElementById(`${formatId(exercise)}-set${i}-reps`)?.value
+        ) || 0;
 
       total += weight * reps;
     }
 
-   let volumeCell = document.getElementById(`${formatId(exercise)}-volume`);
-    volumeCell.innerText = total;
+    let volumeCell = document.getElementById(
+      `${formatId(exercise)}-volume`
+    );
 
-    checkPR(exercise, total);
+    if (volumeCell) {
+      volumeCell.innerText = total;
+    }
   });
 }
 
-function checkPR(exercise, volume) {
-  let prs = JSON.parse(localStorage.getItem("prs")) || {};
+// ===== ADD EXERCISE =====
+function addExercise() {
+  let name = prompt("Enter exercise name:");
 
-  if (!prs[exercise] || volume > prs[exercise]) {
-    prs[exercise] = volume;
-    localStorage.setItem("prs", JSON.stringify(prs));
+  if (!name) return;
 
-    let cell = document.getElementById(`${exercise}-volume`);
-    cell.style.color = "lime";
-  }
+  exercises.push(name);
+
+  // Save updated list
+  localStorage.setItem("exerciseList", JSON.stringify(exercises));
+
+  createTable();
 }
 
-function function saveData() {
+// ===== SAVE WORKOUT =====
+function saveData() {
   let date = document.getElementById("workoutDate").value;
 
   if (!date) {
@@ -96,12 +113,18 @@ function function saveData() {
 
   let workout = {};
 
-  exercises.forEach(exercise => {
+  exercises.forEach((exercise) => {
     workout[exercise] = [];
 
     for (let i = 0; i < 4; i++) {
-      let weight = document.getElementById(`${formatId(exercise)}-set${i}-weight`).value;
-let reps = document.getElementById(`${formatId(exercise)}-set${i}-reps`).value;
+      let weight = document.getElementById(
+        `${formatId(exercise)}-set${i}-weight`
+      ).value;
+
+      let reps = document.getElementById(
+        `${formatId(exercise)}-set${i}-reps`
+      ).value;
+
       workout[exercise].push({ weight, reps });
     }
   });
@@ -111,8 +134,10 @@ let reps = document.getElementById(`${formatId(exercise)}-set${i}-reps`).value;
   localStorage.setItem("allWorkouts", JSON.stringify(allData));
   localStorage.setItem("exerciseList", JSON.stringify(exercises));
 
-  alert("Workout Saved for " + date);
-} 
+  alert("Workout saved for " + date);
+}
+
+// ===== LOAD BY DATE =====
 function loadByDate() {
   let date = document.getElementById("workoutDate").value;
 
@@ -124,69 +149,39 @@ function loadByDate() {
   let allData = JSON.parse(localStorage.getItem("allWorkouts")) || {};
   let workout = allData[date];
 
-
   if (!workout) {
     alert("No workout found for this date.");
     return;
   }
 
-  exercises.forEach(exercise => {
+  exercises.forEach((exercise) => {
     workout[exercise]?.forEach((set, i) => {
-      document.getElementById(`${formatId(exercise)}-set${i}-weight`).value = set.weight;
-document.getElementById(`${formatId(exercise)}-set${i}-reps`).value = set.reps;
+      let weightInput = document.getElementById(
+        `${formatId(exercise)}-set${i}-weight`
+      );
+
+      let repsInput = document.getElementById(
+        `${formatId(exercise)}-set${i}-reps`
+      );
+
+      if (weightInput) weightInput.value = set.weight;
+      if (repsInput) repsInput.value = set.reps;
     });
   });
 
   calculateVolume();
 }
-  let data = {};
 
-  exercises.forEach(exercise => {
-    data[exercise] = [];
-
-    for (let i = 0; i < 4; i++) {
-      let weight = parseInt(document.getElementById(`${formatId(exercise)}-set${i}-weight`)?.value) || 0;
-let reps = parseInt(document.getElementById(`${formatId(exercise)}-set${i}-reps`)?.value) || 0;
-
-      data[exercise].push({ weight, reps });
-    }
-  });
-
-  localStorage.setItem("workoutData", JSON.stringify(data));
-  localStorage.setItem("exerciseList", JSON.stringify(exercises));
-
-  alert("Workout Saved!");
-}
-
+// ===== LOAD ON START =====
 function loadData() {
   let savedExercises = JSON.parse(localStorage.getItem("exerciseList"));
-  if (savedExercises) exercises = savedExercises;
 
-  createTable();
-
-  if (!saved) return;
-
-  let data = JSON.parse(saved);
-
-  exercises.forEach(exercise => {
-    data[exercise]?.forEach((set, i) => {
-      document.getElementById(`${exercise}-set${i}-weight`).value = set.weight;
-      document.getElementById(`${exercise}-set${i}-reps`).value = set.reps;
-    });
-  });
-
-  calculateVolume();
-}
-
-function addExercise() {
-  let name = prompt("Enter exercise name:");
-  if (!name) return;
-
-  exercises.push(name);
-  localStorage.setItem("exerciseList", JSON.stringify(exercises));
+  if (savedExercises) {
+    exercises = savedExercises;
+  }
 
   createTable();
 }
 
+// ===== INIT =====
 window.onload = loadData;
-createTable();
