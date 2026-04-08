@@ -122,7 +122,6 @@ function loadByDate() {
   let allData = JSON.parse(localStorage.getItem("allWorkouts")) || {};
   let workout = allData[date];
 
-  createTable();
 
   if (!workout) {
     alert("No workout found for this date.");
